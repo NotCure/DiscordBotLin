@@ -24,7 +24,7 @@ module.exports = {
 
     
       const port = Number(process.env.API_PORT || 3000);
-      const keepUrl = process.env.KEEPALIVE_URL || `https://discordbotlin.onrender.com:${port}/status`;
+      const keepUrl = process.env.KEEPALIVE_URL || `https://discordbotlin.onrender.com/status`;
 
       const ping = async () => {
         try {
