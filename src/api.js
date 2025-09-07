@@ -25,15 +25,12 @@ function startApiServer() {
   
   const PORT = process.env.API_PORT ? Number(process.env.API_PORT) : 3000;
 
-  // Helper to resolve client IP
   function getIp(req) {
     const xff = req.headers["x-forwarded-for"];
     const first = Array.isArray(xff) ? xff[0] : String(xff || "").split(",")[0];
     return (first || req.socket?.remoteAddress || "unknown").trim();
   }
 
-  // === ONE endpoint: GET /auth?key=...&name=...&sid=...&res=... ===
-  // Returns "true" (consumed) or "false" (failed). Always text/plain.
 app.get("/auth", async (req, res) => {
   try {
      const key  = (req.query.key  || "").trim();
@@ -57,7 +54,7 @@ app.get("/auth", async (req, res) => {
         revoked: false,
         $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
       },
-      { $set: { used: true, usedAt: now, lastCheckAt: now } },
+      { $set: { usedAt: now, lastCheckAt: now } },
       { new: true }
     );
 
@@ -123,10 +120,12 @@ app.get("/auth", async (req, res) => {
     return res.status(500).type("text/plain").send("false");
   }
 });
-
+app.get("/status", (req, res) => {
+  res.type("text/plain").send(`ok ${new Date().toISOString()}`);
+});
 
   app.listen(PORT, () => {
-    console.log(`[api] listening on http://0.0.0.0:${PORT}`);
+    console.log(`[api] listening`);
   });
 }
 
