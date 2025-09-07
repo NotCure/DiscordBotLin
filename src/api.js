@@ -36,22 +36,23 @@ function startApiServer() {
   // Returns "true" (consumed) or "false" (failed). Always text/plain.
 app.get("/auth", async (req, res) => {
   try {
-    const key = (req.query.key || "").trim();
-    if (!key) return res.status(400).type("text/plain").send("false");
+     const key  = (req.query.key  || "").trim();
+     const name = (req.query.name || "").trim();
+     if (!key || !name) return res.status(400).type("text/plain").send("false");
 
-    const meta = {
-      name: (req.query.name || "").toString().slice(0, 64) || "unknown",
-      ep:   (req.query.ep || req.query.endpoint || "").toString().slice(0, 128) || "unknown",
-      sid:  (req.query.sid || "").toString().slice(0, 32) || "unknown", // optional legacy
-      res:  (req.query.res || "").toString().slice(0, 64) || "unknown",
-    };
+    const ep  = (req.query.ep  || req.query.endpoint || "unknown").toString().slice(0, 128);
+    const resName = (req.query.res || "unknown").toString().slice(0, 64);
 
-    const ip = getIp(req);
+    const ip  = getIp(req);
     const now = new Date();
+    const nameLower = name.toLowerCase();
+
+    const meta = { name, ep, res: resName };
 
     const doc = await LicenseKey.findOneAndUpdate(
       {
         key,
+        playerNameLower: nameLower,
         used: false,
         revoked: false,
         $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
